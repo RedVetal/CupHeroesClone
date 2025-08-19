@@ -5,6 +5,7 @@ using TMPro;
 
 public class UIHud : MonoBehaviour
 {
+    public RectTransform SafeAreaRoot { get; private set; }
     public Canvas RootCanvas { get; private set; }
 
     TextMeshProUGUI txtCoins, txtAtk, txtAspd, txtHP;
@@ -35,15 +36,14 @@ public class UIHud : MonoBehaviour
 
         // Safe Area wrapper
         var safe = new GameObject("SafeArea").AddComponent<SafeAreaFitter>();
+        SafeAreaRoot = safe.GetComponent<RectTransform>();
         safe.transform.SetParent(canvasGo.transform, false);
         var safeRt = safe.GetComponent<RectTransform>();
         safeRt.anchorMin = Vector2.zero; safeRt.anchorMax = Vector2.one;
         safeRt.offsetMin = safeRt.offsetMax = Vector2.zero;
 
         // Нижняя половина UI панель
-        var panel = new GameObject("BottomPanel").AddComponent<Image>();
-        panel.transform.SetParent(safe.transform, false);
-        panel.color = new Color(0.08f, 0.08f, 0.1f, 0.85f);
+        var panel = new GameObject("BottomPanel").AsPanel(safe.transform, new Color(0.08f, 0.08f, 0.1f, 0.85f));
 
         var prt = panel.GetComponent<RectTransform>();
         prt.anchorMin = new Vector2(0f, 0f);
@@ -69,9 +69,8 @@ public class UIHud : MonoBehaviour
 
     TextMeshProUGUI MakeStat(Transform parent, string label)
     {
-        var box = new GameObject(label).AddComponent<Image>();
-        box.transform.SetParent(parent, false);
-        box.color = new Color(1, 1, 1, 0.08f);
+        var boxImg = new GameObject(label).AsPanel(parent, new Color(1, 1, 1, 0.08f));
+        var box = boxImg;
         var layout = box.gameObject.AddComponent<LayoutElement>();
         layout.preferredWidth = 240;
 

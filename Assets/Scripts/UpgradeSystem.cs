@@ -22,15 +22,16 @@ public class UpgradeSystem : MonoBehaviour
 
         PanelRoot = new GameObject("UpgradePanel");
         hero.SetPaused(true);                         // changes
-        var canvas = hud.RootCanvas;
-        PanelRoot.transform.SetParent(canvas.transform, false);
+        PanelRoot.transform.SetParent(hud.SafeAreaRoot, false);
 
         var rt = PanelRoot.AddComponent<RectTransform>();
         rt.anchorMin = new Vector2(0.1f, 0.1f);
         rt.anchorMax = new Vector2(0.9f, 0.9f);
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
-        var img = PanelRoot.AddComponent<Image>();
+        var img = PanelRoot.AddComponent<UnityEngine.UI.Image>();
+        img.sprite = UIPrimitives.UISprite;
+        img.type = UnityEngine.UI.Image.Type.Simple;
         img.color = new Color(0, 0, 0, 0.6f);
 
         var grid = new GameObject("Grid").AddComponent<HorizontalLayoutGroup>();
@@ -62,6 +63,8 @@ public class UpgradeSystem : MonoBehaviour
         var go = new GameObject("Card");
         go.transform.SetParent(parent, false);
         var img = go.AddComponent<Image>();
+        img.sprite = UIPrimitives.UISprite;
+        img.type = Image.Type.Simple;
         img.color = new Color(1, 1, 1, 0.9f);
         var btn = go.AddComponent<Button>();
         btn.onClick.AddListener(() => onClick?.Invoke());
