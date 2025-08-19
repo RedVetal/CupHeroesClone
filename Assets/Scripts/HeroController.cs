@@ -13,6 +13,8 @@ public class HeroController : MonoBehaviour
     private Health hp;
     private float shootCd;
     private WaveManager waves;
+    private bool paused = false;   // changes
+    public void SetPaused(bool v) { paused = v; }   // changes
 
     public void Init(WaveManager w) => waves = w;
 
@@ -25,6 +27,8 @@ public class HeroController : MonoBehaviour
 
     void Update()
     {
+        if (paused) return;    // changes
+
         Transform target = AcquireTarget();
 
         bool enemyAhead = target != null && (target.position.x > transform.position.x - 0.1f);

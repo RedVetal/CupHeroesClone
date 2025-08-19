@@ -20,7 +20,7 @@ public class GameBootstrap : MonoBehaviour
         var gsr = ground.AddComponent<SpriteRenderer>();
         gsr.sprite = SpriteFactory.MakeRectSprite(new Color(0.2f, 0.7f, 0.25f, 1f));
         gsr.sortingOrder = 0;
-        ground.transform.localScale = new Vector3(100f, 1.5f, 1f);
+        ground.transform.localScale = new Vector3(1000f, 1.5f, 1f);  // changed
         ground.transform.position = new Vector3(0, -0.75f, 0);
 
         // √ерой (син€€ капсула на базе пр€моугольника)

@@ -21,6 +21,7 @@ public class UpgradeSystem : MonoBehaviour
         if (PanelRoot != null) Destroy(PanelRoot);
 
         PanelRoot = new GameObject("UpgradePanel");
+        hero.SetPaused(true);                         // changes
         var canvas = hud.RootCanvas;
         PanelRoot.transform.SetParent(canvas.transform, false);
 
@@ -82,6 +83,7 @@ public class UpgradeSystem : MonoBehaviour
     {
         Destroy(PanelRoot);
         hud.RefreshHeroStats(); // сразу видно бафф
+        hero.SetPaused(false);  // changed
         waves.NextWave();
     }
 }
