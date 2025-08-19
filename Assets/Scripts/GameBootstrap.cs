@@ -44,8 +44,16 @@ public class GameBootstrap : MonoBehaviour
         heroGo.AddComponent<HPBar2D>();
         var hero = heroGo.AddComponent<HeroController>();
 
-        // Камера следует за героем (простенько)
-        camGo.AddComponent<Follow2D>().Target = heroGo.transform;
+        // Камера следует за героем
+        var follow = camGo.GetComponent<Follow2D>();
+        if (follow == null) follow = camGo.AddComponent<Follow2D>();
+        follow.Target = heroGo.transform;
+        follow.ViewportX = 0.38f;
+        follow.ViewportY = 0.38f;
+        follow.LeadXWorld = 2.0f;
+        follow.SmoothTime = 0.15f;
+
+
 
         // Менеджер волн
         var wavesGo = new GameObject("WaveManager");
@@ -79,19 +87,60 @@ public class GameBootstrap : MonoBehaviour
 }
 
 // Простой фолловер для камеры
+// Привязывает цель к заданной точке вьюпорта (0..1 по X/Y).
+// СНАП первые кадры -> никаких рывков, потом мягкий SmoothDamp.
 public class Follow2D : MonoBehaviour
 {
     public Transform Target;
-    public Vector3 Offset = new(0, 2.5f, -10f);
-    public float LeadX = 2.5f;   // смотреть чуть вперёд
-    public float Smooth = 8f;
+
+    [Range(0f, 1f)] public float ViewportX = 0.38f; // немного слева (место справа для врагов)
+    [Range(0f, 1f)] public float ViewportY = 0.38f; // чуть выше HUD (HUD ~0.28)
+    public float LeadXWorld = 2.0f;                 // упреждение вперёд в мире
+    public Vector3 Offset = new(0, 0, -10f);        // Z камеры
+    public float SmoothTime = 0.15f;                // время сглаживания (сек)
+
+    Camera cam;
+    Vector3 vel;            // для SmoothDamp
+    int snapFrames = 2;     // первые 2 кадра — жёсткий снап
+
+    void Awake() { cam = GetComponent<Camera>(); }
+
+    Vector3 ComputeDesired()
+    {
+        var t = Target ? Target.position : Vector3.zero;
+        t.x += LeadXWorld;
+
+        float ortho = cam.orthographicSize;
+        float halfW = ortho * cam.aspect;
+
+        float camX = t.x - Mathf.Lerp(-halfW, halfW, ViewportX);
+        float camY = t.y - Mathf.Lerp(-ortho, ortho, ViewportY);
+
+        return new Vector3(camX, camY, 0f) + Offset;
+    }
+
+    void OnEnable()
+    {
+        if (!cam) cam = GetComponent<Camera>();
+        // Мгновенно встаём куда нужно, чтобы не было прыжка при старте/снятии паузы
+        var p = ComputeDesired();
+        transform.position = p;
+        vel = Vector3.zero;
+        snapFrames = 2;
+    }
 
     void LateUpdate()
     {
-        if (!Target) return;
-        var desired = Target.position + Offset;
-        desired.x += LeadX;    // упреждение вправо
-        desired.y = 2.5f;      // фикс по высоте
-        transform.position = Vector3.Lerp(transform.position, desired, 1f - Mathf.Exp(-Smooth * Time.deltaTime));
+        if (!Target || !cam || !cam.orthographic) return;
+        var desired = ComputeDesired();
+
+        if (snapFrames > 0)         // первые кадры — жёсткая фиксация
+        {
+            transform.position = desired;
+            snapFrames--;
+            return;
+        }
+
+        transform.position = Vector3.SmoothDamp(transform.position, desired, ref vel, SmoothTime);
     }
 }
