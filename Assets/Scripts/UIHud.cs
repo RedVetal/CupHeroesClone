@@ -27,15 +27,34 @@ public class UIHud : MonoBehaviour
     {
         var canvasGo = new GameObject("CanvasHUD");
         RootCanvas = canvasGo.AddComponent<Canvas>();
-        RootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        var scaler = canvasGo.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+
+        // 1) Рендер через основную камеру — железно видно и в Game, и в Simulator
+        var cam = Camera.main;
+        if (cam == null) cam = FindFirstObjectByType<Camera>();
+        RootCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+        RootCanvas.worldCamera = cam;
+        RootCanvas.planeDistance = 1f;    // близко к камере
+        RootCanvas.sortingOrder = 1000;  // поверх всего
+
+        var scaler = canvasGo.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1080, 1920);
         scaler.matchWidthOrHeight = 1f;
-        canvasGo.AddComponent<GraphicRaycaster>();
+
+        canvasGo.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+
 
         // Safe Area wrapper
         var safe = new GameObject("SafeArea").AddComponent<SafeAreaFitter>();
+#if UNITY_EDITOR
+        // Полупрозрачная плашка по всей SafeArea — чтобы 100% увидеть UI
+        var dbg = new GameObject("DBG_SafeAreaFill").AsPanel(safe.transform, new Color(1, 0, 0, 0.05f));
+        var dbgRt = dbg.GetComponent<RectTransform>();
+        dbgRt.anchorMin = Vector2.zero; dbgRt.anchorMax = Vector2.one;
+        dbgRt.offsetMin = dbgRt.offsetMax = Vector2.zero;
+#endif
+
         SafeAreaRoot = safe.GetComponent<RectTransform>();
         safe.transform.SetParent(canvasGo.transform, false);
         var safeRt = safe.GetComponent<RectTransform>();

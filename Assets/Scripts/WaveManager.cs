@@ -20,7 +20,7 @@ public class WaveManager : MonoBehaviour
     {
         ActiveEnemies.Clear();
         int count = 3 + index; // каждую волну +1 враг
-        float startX = (Hero != null ? Hero.position.x : 0f) + 10f;
+        float startX = (Hero != null ? Hero.position.x : 0f) + 6f;
         for (int i = 0; i < count; i++)
         {
             float x = startX + i * 2.2f;

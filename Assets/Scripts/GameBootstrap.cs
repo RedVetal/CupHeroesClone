@@ -7,13 +7,21 @@ public class GameBootstrap : MonoBehaviour
     void Start()
     {
         // Камера
-        var camGo = new GameObject("MainCamera");
-        var cam = camGo.AddComponent<Camera>();
+        var cam = Camera.main;
+        GameObject camGo;
+        if (cam == null)
+        {
+            camGo = new GameObject("MainCamera");
+            cam = camGo.AddComponent<Camera>();
+            cam.tag = "MainCamera";
+        }
+        else camGo = cam.gameObject;
+
         cam.orthographic = true;
         cam.orthographicSize = 6f;
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = new Color(0.6f, 0.8f, 1f, 1f);
-        cam.tag = "MainCamera";
+
 
         // Земля (просто фон полоса)
         var ground = new GameObject("Ground");
@@ -58,9 +66,12 @@ public class GameBootstrap : MonoBehaviour
         hero.Init(waves);
 
         // EventSystem для кнопок
-        var es = new GameObject("EventSystem");
-        es.AddComponent<EventSystem>();
-        es.AddComponent<StandaloneInputModule>();
+        if (FindAnyObjectByType<EventSystem>() == null)
+        {
+            var es = new GameObject("EventSystem");
+            es.AddComponent<EventSystem>();
+            es.AddComponent<StandaloneInputModule>();
+        }
 
         // Первая волна
         waves.StartFirstWave();
@@ -72,11 +83,15 @@ public class Follow2D : MonoBehaviour
 {
     public Transform Target;
     public Vector3 Offset = new(0, 2.5f, -10f);
+    public float LeadX = 2.5f;   // смотреть чуть вперёд
+    public float Smooth = 8f;
+
     void LateUpdate()
     {
         if (!Target) return;
-        var p = Target.position + Offset;
-        p.y = 2.5f; // фикс по высоте
-        transform.position = p;
+        var desired = Target.position + Offset;
+        desired.x += LeadX;    // упреждение вправо
+        desired.y = 2.5f;      // фикс по высоте
+        transform.position = Vector3.Lerp(transform.position, desired, 1f - Mathf.Exp(-Smooth * Time.deltaTime));
     }
 }

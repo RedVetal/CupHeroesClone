@@ -771,7 +771,7 @@ PlayerSettings:
   cloudProjectId: 1e913973-0708-40e0-b5d0-af159d54559e
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Heroes
+  projectName: CupHeroesClone
   organizationId: redvetal
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
